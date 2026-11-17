@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Vayro" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/vayro_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/vayro_secondary</item>
+        <item name="colorSurface">@color/vayro_card</item>
+        <item name="colorOnSurface">@color/vayro_text</item>
+        <item name="android:windowBackground">@color/vayro_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- أيقونات شريط الحالة داكنة في الوضع الفاتح -->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- المرحلة 4: عنوان قسم داخل نوافذ الإعدادات -->
+    <style name="VayroSectionLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:textColor">@color/vayro_text_secondary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

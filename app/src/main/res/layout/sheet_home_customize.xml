@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/home_customize"
+            android:textColor="@color/vayro_text"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            style="@style/VayroSectionLabel"
+            android:text="@string/home_sections" />
+
+        <LinearLayout
+            android:id="@+id/sectionsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            style="@style/VayroSectionLabel"
+            android:text="@string/home_card_size" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/sizeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sizeCompact"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/size_compact" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sizeNormal"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/size_normal" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sizeLarge"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/size_large" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <TextView
+            style="@style/VayroSectionLabel"
+            android:text="@string/home_background" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/bgGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bgDefault"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/bg_default" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bgViolet"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/bg_violet" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bgCyan"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/bg_cyan" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bgDeep"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/bg_deep" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <TextView
+            style="@style/VayroSectionLabel"
+            android:text="@string/home_toolbar" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/toolbarReload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/toolbar_show_reload"
+            android:textColor="@color/vayro_text" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/toolbarStar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/toolbar_show_star"
+            android:textColor="@color/vayro_text" />
+    </LinearLayout>
+</ScrollView>

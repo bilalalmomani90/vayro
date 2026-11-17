@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ألوان الوضع الداكن حسب المواصفات -->
+    <color name="vayro_background">#101525</color>
+    <color name="vayro_card">#1B2540</color>
+    <color name="vayro_text">#FFFFFF</color>
+    <color name="vayro_text_secondary">#A9B3D1</color>
+    <color name="vayro_stroke">#2C3A63</color>
+</resources>

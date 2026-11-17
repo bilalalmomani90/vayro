@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- دائرة بتدرج الهوية (بنفسجي إلى سماوي) خلف حرف الاختصار -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <gradient android:startColor="@color/vayro_primary" android:endColor="@color/vayro_secondary" android:angle="135" />
+</shape>

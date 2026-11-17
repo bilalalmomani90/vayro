@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ألوان الهوية المعتمدة (ثابتة في الوضعين) -->
+    <color name="vayro_primary">#7657FF</color>
+    <color name="vayro_secondary">#21C8F6</color>
+    <color name="vayro_dark_bg">#101525</color>
+    <color name="vayro_dark_card">#1B2540</color>
+    <color name="white">#FFFFFF</color>
+    <color name="vayro_success">#20C997</color>
+    <color name="vayro_warning">#FFB547</color>
+
+    <!-- ألوان الوضع الفاتح: القيم غير محددة في المواصفات، اختيار مبدئي قابل للتعديل -->
+    <color name="vayro_background">#F4F5FB</color>
+    <color name="vayro_card">#FFFFFF</color>
+    <color name="vayro_text">#101525</color>
+    <color name="vayro_text_secondary">#5B6585</color>
+    <color name="vayro_stroke">#DDE0F0</color>
+</resources>

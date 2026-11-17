@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/vayro_background"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <!-- الشريط العلوي: عنوان/بحث + تحديث + قائمة. استخدمنا start/end لدعم RTL تلقائياً -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:id="@+id/addressBar"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_address_bar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="4dp">
+
+            <EditText
+                android:id="@+id/addressInput"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/address_hint"
+                android:imeOptions="actionGo"
+                android:importantForAutofill="no"
+                android:inputType="textUri"
+                android:maxLines="1"
+                android:selectAllOnFocus="true"
+                android:textColor="@color/vayro_text"
+                android:textColorHint="@color/vayro_text_secondary"
+                android:textSize="15sp" />
+
+            <!-- جديد: إضافة/إزالة الصفحة من المفضلة -->
+            <ImageButton
+                android:id="@+id/starButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/bookmark_toggle_desc"
+                android:src="@drawable/ic_star_outline"
+                app:tint="@color/vayro_warning" />
+
+            <ImageButton
+                android:id="@+id/goButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_go"
+                android:src="@drawable/ic_go"
+                app:tint="@color/vayro_primary" />
+        </LinearLayout>
+
+        <!-- جديد: عدد التبويبات المفتوحة، يفتح نافذة التبويبات -->
+        <TextView
+            android:id="@+id/tabsButton"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_tab_count"
+            android:contentDescription="@string/tabs_button_desc"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:text="1"
+            android:textColor="@color/vayro_text"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/reloadButton"
+            android:layout_width="44dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_reload"
+            android:src="@drawable/ic_reload"
+            app:tint="@color/vayro_text" />
+
+        <ImageButton
+            android:id="@+id/menuButton"
+            android:layout_width="44dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_menu"
+            android:src="@drawable/ic_more"
+            app:tint="@color/vayro_text" />
+    </LinearLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:indicatorColor="@color/vayro_secondary"
+        app:trackThickness="3dp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- حاوية المحرك: يضيف المحرك عرضه هنا (يفصل الواجهة عن GeckoView) -->
+        <FrameLayout
+            android:id="@+id/engineContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- الصفحة الرئيسية القابلة للتخصيص: تظهر قبل فتح أي موقع وتختفي بعده.
+             محتوى الأقسام (اختصارات/مجموعات/مفضلة/الأحدث) يبنيه HomeController حسب إعدادات المستخدم -->
+        <ScrollView
+            android:id="@+id/homeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/vayro_background"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:contentDescription="@string/app_name"
+                        android:src="@drawable/vayro_logo" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/home_title"
+                            android:textColor="@color/vayro_text"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <!-- اسم مساحة العمل الحالية؛ الضغط عليه يفتح قائمة المساحات -->
+                        <TextView
+                            android:id="@+id/workspaceLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:textColor="@color/vayro_secondary"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/privateNotice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_home_card"
+                    android:padding="14dp"
+                    android:text="@string/private_notice"
+                    android:textColor="@color/vayro_text"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/homeContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/customizeButton"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/home_customize" />
+            </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+</LinearLayout>

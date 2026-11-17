@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- جديد: تبويب جديد، المفضلة، السجل -->
+    <item android:id="@+id/menu_new_tab" android:title="@string/menu_new_tab" />
+    <!-- جديد (المرحلتان 9 و10) -->
+    <item android:id="@+id/menu_new_private_tab" android:title="@string/menu_new_private_tab" />
+    <item android:id="@+id/menu_close_private" android:title="@string/menu_close_private" />
+    <item android:id="@+id/menu_forward" android:title="@string/menu_forward" />
+    <item android:id="@+id/menu_share" android:title="@string/menu_share" />
+    <item android:id="@+id/menu_add_to_home" android:title="@string/menu_add_to_home" />
+    <item android:id="@+id/menu_bookmarks" android:title="@string/menu_bookmarks" />
+    <item android:id="@+id/menu_history" android:title="@string/menu_history" />
+    <!-- جديد: حماية الموقع، تقرير الحماية، الخصوصية -->
+    <!-- جديد: التنزيلات وتوفير البيانات -->
+    <!-- جديد: مساحات العمل والاختصارات والمجموعات -->
+    <item android:id="@+id/menu_workspaces" android:title="@string/menu_workspaces" />
+    <item android:id="@+id/menu_add_shortcut" android:title="@string/menu_add_shortcut" />
+    <item android:id="@+id/menu_add_to_group" android:title="@string/menu_add_to_group" />
+    <item android:id="@+id/menu_downloads" android:title="@string/menu_downloads" />
+    <item android:id="@+id/menu_data_saver" android:title="@string/menu_data_saver" />
+    <item android:id="@+id/menu_site_protection" android:title="@string/menu_site_protection" />
+    <item android:id="@+id/menu_report" android:title="@string/menu_report" />
+    <item android:id="@+id/menu_privacy" android:title="@string/menu_privacy" />
+    <item android:id="@+id/menu_default_browser" android:title="@string/menu_default_browser" />
+    <item android:id="@+id/menu_about" android:title="@string/menu_about" />
+    <item android:id="@+id/menu_language_ar" android:title="@string/menu_language_ar" />
+    <item android:id="@+id/menu_language_en" android:title="@string/menu_language_en" />
+    <item android:id="@+id/menu_theme_light" android:title="@string/menu_theme_light" />
+    <item android:id="@+id/menu_theme_dark" android:title="@string/menu_theme_dark" />
+    <item android:id="@+id/menu_theme_system" android:title="@string/menu_theme_system" />
+</menu>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- خلفية الصفحة الرئيسية "cyan": تدرج شفاف (20%) فوق لون الخلفية فتبقى النصوص مقروءة في الوضعين -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/vayro_background" />
+    <item>
+        <shape android:shape="rectangle">
+            <gradient android:startColor="#3321C8F6" android:endColor="#3320C997" android:angle="135" />
+        </shape>
+    </item>
+</layer-list>

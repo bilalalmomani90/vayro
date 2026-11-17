@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/group_open_all" android:title="@string/group_open_all" />
+    <item android:id="@+id/group_rename" android:title="@string/group_rename" />
+    <item android:id="@+id/group_edit_sites" android:title="@string/group_edit_sites" />
+    <item android:id="@+id/group_delete" android:title="@string/dl_action_delete" />
+</menu>
