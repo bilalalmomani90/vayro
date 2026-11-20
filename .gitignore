@@ -1,0 +1,17 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/app/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+# أسرار: لا ترفعها أبداً
+*.jks
+*.keystore
+keystore.properties
+google-services.json
+*.pem
+.env

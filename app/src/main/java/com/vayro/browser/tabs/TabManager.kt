@@ -3,6 +3,7 @@ package com.vayro.browser.tabs
 import com.vayro.browser.core.UrlResolver
 import com.vayro.browser.data.HistorySink
 import com.vayro.browser.engine.BrowserEngine
+import com.vayro.browser.engine.PageTranslationState
 
 /**
  * يدير قائمة التبويبات والتبويب المحدد، ويسجل السجل ويحفظ الجلسة.
@@ -154,7 +155,13 @@ class TabManager(
         override fun onUrlChanged(url: String) {
             // about:blank الأولي لا يعني أن المستخدم فتح صفحة
             if (url == "about:blank" && tab.url == null) return
+            if (tab.url != url) tab.translation = null // صفحة جديدة: حالة الترجمة القديمة لم تعد صالحة
             tab.url = url
+            listener?.onTabUpdated(tab)
+        }
+
+        override fun onTranslationState(state: PageTranslationState) {
+            tab.translation = state
             listener?.onTabUpdated(tab)
         }
 

@@ -211,4 +211,13 @@
     <string name="crash_message">حُفظ تقرير الانهيار على هذا الجهاز فقط. راجعه وشاركه إن أردت المساعدة في إصلاح المشكلة.</string>
     <string name="crash_view">عرض التقرير</string>
     <string name="crash_dismiss">حذف</string>
+    <!-- المرحلة 14: الترجمة المحلية -->
+    <string name="menu_translate">ترجمة الصفحة</string>
+    <string name="menu_translate_restore">عرض الأصل</string>
+    <string name="tr_unavailable">الترجمة غير متاحة لهذه الصفحة</string>
+    <string name="tr_same_language">الصفحة بلغتك بالفعل</string>
+    <string name="tr_download_confirm">تحتاج الترجمة إلى نموذج لغة (%1$s) يُنزَّل مرة واحدة إلى هذا الجهاز. تُترجَم نصوص الصفحة داخل جهازك ولا تُرسل إلى أي خادم.</string>
+    <string name="tr_download_go">نزّل وترجم</string>
+    <string name="tr_started">جارٍ الترجمة…</string>
+    <string name="tr_failed">فشلت الترجمة: %1$s</string>
 </resources>

@@ -18,6 +18,7 @@ import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoSessionSettings
 import org.mozilla.geckoview.GeckoView
+import org.mozilla.geckoview.TranslationsController
 import org.mozilla.geckoview.WebResponse
 
 /** تنفيذ BrowserEngine باستخدام GeckoView؛ كل كائن = جلسة = تبويب واحد. */
@@ -250,6 +251,28 @@ class GeckoBrowserEngine(
             }
         }
 
+        // جديد (المرحلة 14): الترجمة المحلية. نص الصفحة يُترجَم داخل الجهاز ولا يُرسل لأي خادم
+        session.setTranslationsSessionDelegate(object : TranslationsController.SessionTranslation.Delegate {
+            override fun onTranslationStateChange(
+                session: GeckoSession,
+                translationState: TranslationsController.SessionTranslation.TranslationState?
+            ) {
+                val detected = translationState?.detectedLanguages
+                val translated = translationState != null &&
+                    translationState.requestedTranslationPair != null &&
+                    translationState.error == null &&
+                    translationState.hasVisibleChange
+                listener?.onTranslationState(
+                    PageTranslationState(
+                        detectedLanguage = detected?.docLangTag,
+                        canTranslate = detected?.isDocLangTagSupported == true,
+                        isTranslated = translated,
+                        error = translationState?.error
+                    )
+                )
+            }
+        })
+
         session.open(runtime)
     }
 
@@ -288,6 +311,28 @@ class GeckoBrowserEngine(
     override fun goForward() = session.goForward()
 
     override fun exitFullScreen() = session.exitFullScreen()
+
+    override fun checkTranslationSize(from: String, to: String, done: (Long?) -> Unit) {
+        TranslationsController.RuntimeTranslation.checkPairDownloadSize(from, to)
+            .accept({ size -> done(size) }, { done(null) })
+    }
+
+    override fun translatePage(from: String, to: String, downloadModel: Boolean, onDone: (String?) -> Unit) {
+        val translation = session.sessionTranslation
+        if (translation == null) {
+            onDone("translation engine unavailable")
+            return
+        }
+        val options = TranslationsController.SessionTranslation.TranslationOptions.Builder()
+            .downloadModel(downloadModel)
+            .build()
+        translation.translate(from, to, options)
+            .accept({ onDone(null) }, { error -> onDone(error?.message ?: "translation failed") })
+    }
+
+    override fun restoreOriginalPage() {
+        session.sessionTranslation?.restoreOriginalPage()
+    }
 
     // الاستثناء يُحفظ الآن كإذن PERMISSION_TRACKING (ALLOW = السماح للمتتبعات = حماية مطفأة لهذا الموقع)
     // لأن ContentBlockingController.addException/removeException أُزيلت من GeckoView

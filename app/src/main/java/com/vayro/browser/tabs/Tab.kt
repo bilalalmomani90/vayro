@@ -1,6 +1,7 @@
 package com.vayro.browser.tabs
 
 import com.vayro.browser.engine.BrowserEngine
+import com.vayro.browser.engine.PageTranslationState
 
 /**
  * تبويب واحد. المحرك (الجلسة) لا يُنشأ إلا عند أول استخدام فعلي،
@@ -14,6 +15,7 @@ class Tab(val id: Long, val isPrivate: Boolean, private val createEngine: (Tab) 
     var canGoForward = false
     var isLoading = false
     var crashCount = 0 // مرات الانهيار المتتالية (لمنع حلقة إعادة تحميل لا تنتهي)
+    var translation: PageTranslationState? = null // حالة ترجمة الصفحة الحالية
     var isFullScreen = false // الصفحة في وضع ملء الشاشة (فيديو)
     var progress = 0
 

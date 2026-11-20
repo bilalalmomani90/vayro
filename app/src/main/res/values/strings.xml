@@ -211,4 +211,13 @@
     <string name="crash_message">A crash report was saved on this device only. Review it and share it if you want to help fix the problem.</string>
     <string name="crash_view">View report</string>
     <string name="crash_dismiss">Delete</string>
+    <!-- المرحلة 14: الترجمة المحلية -->
+    <string name="menu_translate">Translate page</string>
+    <string name="menu_translate_restore">Show original</string>
+    <string name="tr_unavailable">Translation isn\'t available for this page</string>
+    <string name="tr_same_language">This page is already in your language</string>
+    <string name="tr_download_confirm">Translating needs a language model (%1$s) downloaded once to this device. The page text is translated on your device and is never sent to a server.</string>
+    <string name="tr_download_go">Download and translate</string>
+    <string name="tr_started">Translating…</string>
+    <string name="tr_failed">Translation failed: %1$s</string>
 </resources>

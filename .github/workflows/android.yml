@@ -15,42 +15,66 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # إن وُجد ملف vayro-*-full.zip في جذر المستودع نبني منه (يتجاوز مشكلة رفع عشرات الملفات بمساراتها)،
+      # وإلا نبني من ملفات المستودع نفسها. عند وجود أكثر من zip يُختار الأعلى إصداراً.
+      - name: Choose project source
+        id: src
+        run: |
+          ZIP=$(ls vayro-*-full.zip 2>/dev/null | sort -V | tail -n 1 || true)
+          if [ -n "$ZIP" ]; then
+            echo "Building from $ZIP"
+            rm -rf _src && mkdir _src && unzip -q "$ZIP" -d _src
+            echo "dir=_src/vayro" >> "$GITHUB_OUTPUT"
+          else
+            echo "Building from repository files"
+            echo "dir=." >> "$GITHUB_OUTPUT"
+          fi
+
+      # التأكد أن كل ملفات المشروع موجودة (يكشف الرفع الناقص بقائمة واضحة بدل مئات أخطاء الترجمة)
+      - name: Verify project files
+        working-directory: ${{ steps.src.outputs.dir }}
+        run: bash scripts/verify_files.sh
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # يوفر أمر gradle بإصدار ثابت (لا يوجد gradle wrapper في المستودع بعد)
+      # يوفر أمر gradle بإصدار ثابت (لا يوجد gradle wrapper في المشروع)
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
 
       - name: Unit tests
+        working-directory: ${{ steps.src.outputs.dir }}
         run: gradle --no-daemon testDebugUnitTest
 
       - name: Build debug APK
+        working-directory: ${{ steps.src.outputs.dir }}
         run: gradle --no-daemon assembleDebug
 
       # يحدّث PROJECT_INFO.txt بوقت البناء الفعلي بعد نجاح الاختبارات والبناء فقط
       - name: Update PROJECT_INFO.txt
         if: success()
+        working-directory: ${{ steps.src.outputs.dir }}
         run: bash scripts/update_project_info.sh SUCCESS PASSED
 
-      # المرفقات تستهلك حصة تخزين الحساب (APK مع GeckoView كبير)، لذلك:
-      # يوم واحد فقط، والـ APK فقط، ولا يُفشل البناء كله إن امتلأت الحصة
+      # المرفقات تستهلك حصة تخزين الحساب: يوم واحد، والـ APK فقط، ولا يُفشل البناء إن امتلأت الحصة
       - uses: actions/upload-artifact@v4
         if: success()
         continue-on-error: true
         with:
           name: vayro-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: ${{ steps.src.outputs.dir }}/app/build/outputs/apk/debug/*.apk
           retention-days: 1
 
       # الطريقة الأساسية للحصول على الملف: إصدار تجريبي واحد يُستبدل في كل بناء ناجح على main
       - name: Publish latest debug APK as a pre-release
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: ${{ steps.src.outputs.dir }}
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           APK=$(ls app/build/outputs/apk/debug/*.apk | head -n 1)
           gh release delete latest-debug --cleanup-tag --yes || true

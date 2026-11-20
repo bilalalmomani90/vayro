@@ -3,6 +3,7 @@ package com.vayro.browser.tabs
 import android.view.ViewGroup
 import com.vayro.browser.data.HistorySink
 import com.vayro.browser.engine.BrowserEngine
+import com.vayro.browser.engine.PageTranslationState
 import com.vayro.browser.engine.PermissionHandler
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -22,6 +23,9 @@ private class FakeEngine : BrowserEngine {
     override fun goBack() {}
     override fun goForward() {}
     override fun exitFullScreen() {}
+    override fun checkTranslationSize(from: String, to: String, done: (Long?) -> Unit) { done(0L) }
+    override fun translatePage(from: String, to: String, downloadModel: Boolean, onDone: (String?) -> Unit) { onDone(null) }
+    override fun restoreOriginalPage() {}
     override fun setProtectionException(enabled: Boolean) {}
     override fun release() { released = true }
 }
@@ -148,6 +152,16 @@ class TabManagerTest {
         (m.activate(m.selected) as FakeEngine).listener!!.onUrlChanged("https://a.com")
         repeat(3) { (m.activate(m.selected) as FakeEngine).listener!!.onCrashed() }
         assertNull(m.selected.pendingUrl) // بعد 3 انهيارات لا نعيد المحاولة تلقائياً
+    }
+
+    @Test fun translationStateIsKeptPerPageAndResetOnNavigation() {
+        val m = manager()
+        val engine = m.activate(m.selected) as FakeEngine
+        engine.listener!!.onUrlChanged("https://a.com")
+        engine.listener!!.onTranslationState(PageTranslationState("fr", true, false, null))
+        assertEquals("fr", m.selected.translation?.detectedLanguage)
+        engine.listener!!.onUrlChanged("https://b.com") // صفحة جديدة
+        assertNull(m.selected.translation)
     }
 
     @Test fun sessionIsPersistedOnChanges() {
