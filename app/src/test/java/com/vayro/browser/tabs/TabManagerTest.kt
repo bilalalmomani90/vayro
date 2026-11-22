@@ -6,6 +6,7 @@ import com.vayro.browser.engine.BrowserEngine
 import com.vayro.browser.engine.PageTranslationState
 import com.vayro.browser.engine.PermissionHandler
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -23,6 +24,8 @@ private class FakeEngine : BrowserEngine {
     override fun goBack() {}
     override fun goForward() {}
     override fun exitFullScreen() {}
+    var desktop: Boolean? = null
+    override fun setDesktopMode(enabled: Boolean, reload: Boolean) { desktop = enabled }
     override fun checkTranslationSize(from: String, to: String, done: (Long?) -> Unit) { done(0L) }
     override fun translatePage(from: String, to: String, downloadModel: Boolean, onDone: (String?) -> Unit) { onDone(null) }
     override fun restoreOriginalPage() {}
@@ -162,6 +165,46 @@ class TabManagerTest {
         assertEquals("fr", m.selected.translation?.detectedLanguage)
         engine.listener!!.onUrlChanged("https://b.com") // صفحة جديدة
         assertNull(m.selected.translation)
+    }
+
+    @Test fun desktopModeIsPerTabAndAppliedWhenEngineIsCreated() {
+        val m = manager()
+        m.setDesktopMode(m.selected, true) // لا محرك بعد: يُحفظ العلم فقط
+        assertTrue(m.selected.desktopMode)
+        val engine = m.activate(m.selected) as FakeEngine
+        assertEquals(true, engine.desktop) // طُبِّق عند إنشاء المحرك
+        val other = m.newTab("https://b.com")
+        assertFalse(other.desktopMode) // لا يتسرب إلى تبويب آخر
+    }
+
+    @Test fun backFromLinkTabReturnsToOpener() {
+        val m = manager()
+        val opener = m.selected
+        m.loadInSelected("https://a.com")
+        val engine = m.activate(opener) as FakeEngine
+        engine.listener!!.onOpenInNewTab("https://b.com") // رابط target=_blank
+        val child = m.selected
+        assertEquals(opener.id, child.openerId)
+        assertTrue(m.closeToOpener(child))
+        assertTrue(m.selected === opener)
+        assertEquals(1, m.tabs.size)
+    }
+
+    @Test fun closeToOpenerDoesNothingWithoutOpener() {
+        val m = manager()
+        assertFalse(m.closeToOpener(m.selected))
+        assertEquals(1, m.tabs.size)
+    }
+
+    @Test fun resetToHomeClearsPageAndReleasesEngine() {
+        val m = manager()
+        m.loadInSelected("https://a.com")
+        val engine = engines[0]
+        m.resetToHome(m.selected)
+        assertNull(m.selected.url)
+        assertNull(m.selected.pendingUrl)
+        assertTrue(engine.released)
+        assertNull(m.selected.engineOrNull)
     }
 
     @Test fun sessionIsPersistedOnChanges() {

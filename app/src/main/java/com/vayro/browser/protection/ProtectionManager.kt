@@ -8,6 +8,7 @@ import com.vayro.browser.core.HostUtil
 import com.vayro.browser.core.ProtectionLevel
 import com.vayro.browser.core.ProtectionLogic
 import com.vayro.browser.data.BlockLogRepository
+import com.vayro.browser.downloads.DownloadRequest
 
 /**
  * مركز قرارات الحماية: المستوى، سياسة الكوكيز، استثناءات المواقع، السماح المؤقت، وتسجيل الحجب.
@@ -19,6 +20,8 @@ class ProtectionManager(context: Context, private val log: BlockLogRepository) {
     interface Listener {
         fun onPopupBlocked(url: String)
         fun onRedirectBlocked(url: String)
+        fun onSiteBlocked(url: String) // جديد: موقع في قائمة المحظورات
+        fun onDownloadBlocked(request: DownloadRequest) // جديد: تنزيل لم يسبقه لمس
     }
 
     /** يطبّق المستوى على المحرك الفعلي (يضعه المحرك عند إنشاء الجلسة الأولى). */
@@ -62,10 +65,29 @@ class ProtectionManager(context: Context, private val log: BlockLogRepository) {
     fun popupsAllowed(host: String?): Boolean = host != null && host in hostSet(KEY_POPUP_HOSTS)
     fun setPopupsAllowed(host: String, allowed: Boolean) = setHost(KEY_POPUP_HOSTS, host, allowed)
 
+    // ---- "أنقذني من هذا الموقع": مواقع تُعامَل بأقصى حماية ----
+    fun isStrict(host: String?): Boolean = host != null && host in hostSet(KEY_STRICT)
+    fun setStrict(host: String, strict: Boolean) = setHost(KEY_STRICT, host, strict)
+
+    /** يحجب تنزيلاً لم يسبقه لمس المستخدم (مدة اللمس تحددها الواجهة التي تستدعي). */
+    fun shouldBlockAutoDownload(pageUrl: String?, recentTouch: Boolean): Boolean {
+        val host = HostUtil.hostOf(pageUrl)
+        return ProtectionLogic.autoDownloadBlocked(
+            ProtectionLogic.effectiveLevel(level(), isStrict(host)), isProtected(host), recentTouch
+        )
+    }
+
+    // ---- قائمة المواقع المحظورة (يديرها المستخدم) ----
+    fun blockedHosts(): List<String> = hostSet(KEY_BLOCKED).sorted()
+    fun setBlocked(host: String, blocked: Boolean) = setHost(KEY_BLOCKED, host, blocked)
+    fun isUrlBlocked(url: String): Boolean = HostUtil.matchesBlocklist(HostUtil.hostOf(url), hostSet(KEY_BLOCKED))
+
     // ---- قرارات ----
     fun popupAllowed(pageUrl: String?, recentTouch: Boolean): Boolean {
         val host = HostUtil.hostOf(pageUrl)
-        return ProtectionLogic.popupAllowed(level(), isProtected(host), popupsAllowed(host), recentTouch)
+        return ProtectionLogic.popupAllowed(
+            ProtectionLogic.effectiveLevel(level(), isStrict(host)), isProtected(host), popupsAllowed(host), recentTouch
+        )
     }
 
     /** نافذة منبثقة حجبها المحرك أصلاً: لا نسمح بها إلا إن أطفأ المستخدم الحماية أو سمح للموقع. */
@@ -81,7 +103,8 @@ class ProtectionManager(context: Context, private val log: BlockLogRepository) {
         val pageHost = HostUtil.hostOf(pageUrl)
         val crossSite = pageHost != null && !HostUtil.sameSite(pageHost, HostUtil.hostOf(targetUrl))
         return ProtectionLogic.redirectBlocked(
-            level(), isProtected(pageHost), isDirect, isServerRedirect, crossSite, recentTouch
+            ProtectionLogic.effectiveLevel(level(), isStrict(pageHost)),
+            isProtected(pageHost), isDirect, isServerRedirect, crossSite, recentTouch
         )
     }
 
@@ -109,6 +132,8 @@ class ProtectionManager(context: Context, private val log: BlockLogRepository) {
         const val KEY_COOKIES = "cookies"
         const val KEY_OFF_HOSTS = "off_hosts"
         const val KEY_POPUP_HOSTS = "popup_hosts"
+        const val KEY_BLOCKED = "blocked_hosts"
+        const val KEY_STRICT = "strict_hosts"
         const val TEMP_ALLOW_MS = 60_000L
     }
 }

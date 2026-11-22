@@ -16,6 +16,8 @@ class Tab(val id: Long, val isPrivate: Boolean, private val createEngine: (Tab) 
     var isLoading = false
     var crashCount = 0 // مرات الانهيار المتتالية (لمنع حلقة إعادة تحميل لا تنتهي)
     var translation: PageTranslationState? = null // حالة ترجمة الصفحة الحالية
+    var desktopMode = false // وضع موقع سطح المكتب لهذا التبويب
+    var openerId: Long? = null // التبويب الذي فُتح هذا التبويب منه (رابط target=_blank)
     var isFullScreen = false // الصفحة في وضع ملء الشاشة (فيديو)
     var progress = 0
 

@@ -220,4 +220,36 @@
     <string name="tr_download_go">Download and translate</string>
     <string name="tr_started">Translating…</string>
     <string name="tr_failed">Translation failed: %1$s</string>
+    <!-- المرحلة 15: المواقع المحظورة ومشاركة القوائم -->
+    <string name="blocked_sites_button">Blocked sites</string>
+    <string name="blocked_sites_title">Blocked sites (tap one to unblock)</string>
+    <string name="blocked_sites_empty">No blocked sites yet</string>
+    <string name="blocked_sites_add">Add site</string>
+    <string name="blocked_site_added">Site blocked</string>
+    <string name="blocked_site_removed">Site unblocked</string>
+    <string name="site_block_switch">Block this site</string>
+    <string name="snack_site_blocked">Blocked by your list: %1$s</string>
+    <string name="block_row_blocked">Site blocked by your list, from %1$s</string>
+    <string name="group_share">Share list</string>
+    <!-- المرحلة 16: بطاقة الثقة وزر الإنقاذ -->
+    <string name="trust_green">No warning signs found</string>
+    <string name="trust_yellow">Be careful</string>
+    <string name="trust_red">Blocked by you</string>
+    <string name="trust_r_user_blocked">This site is on your blocked list</string>
+    <string name="trust_r_not_encrypted">The connection isn\'t encrypted (HTTP)</string>
+    <string name="trust_r_redirects">Several automatic redirects were blocked on this site this week</string>
+    <string name="trust_r_popups">Many pop-ups were blocked on this site this week</string>
+    <string name="trust_r_protection_off">Protection is turned off for this site</string>
+    <string name="trust_r_none">Nothing unusual in the activity on your device</string>
+    <string name="trust_disclaimer">Based only on signals on your device (HTTPS, your blocked list, blocks this week). It is not a safety scan: it doesn\'t check phishing or malware databases.</string>
+    <string name="rescue_button">Rescue me from this site</string>
+    <string name="rescue_note">Turns protection on for this site, blocks its pop-ups, automatic redirects and unrequested downloads, then reloads the page.</string>
+    <string name="rescue_done">Strict protection applied to this site</string>
+    <string name="snack_download_blocked">Download blocked: it didn\'t follow a tap</string>
+    <string name="snack_download_allow">Download anyway</string>
+    <string name="block_row_download">Unrequested download blocked on %1$s</string>
+    <!-- المرحلة 17: موقع سطح المكتب -->
+    <string name="menu_desktop_site">Desktop site</string>
+    <string name="desktop_on">Desktop site is on for this tab</string>
+    <string name="desktop_off">Desktop site is off</string>
 </resources>

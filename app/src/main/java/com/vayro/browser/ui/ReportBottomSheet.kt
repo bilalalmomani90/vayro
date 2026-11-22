@@ -70,6 +70,8 @@ class ReportBottomSheet : BottomSheetDialogFragment() {
             BlockReason.TRACKER -> R.string.block_row_tracker
             BlockReason.POPUP -> R.string.block_row_popup
             BlockReason.REDIRECT -> R.string.block_row_redirect
+            BlockReason.BLOCKED -> R.string.block_row_blocked
+            BlockReason.DOWNLOAD -> R.string.block_row_download
         }
         val whenText = DateUtils.getRelativeTimeSpanString(e.timestamp, now, DateUtils.MINUTE_IN_MILLIS)
         return Row(

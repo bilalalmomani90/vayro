@@ -49,6 +49,9 @@ interface BrowserEngine {
     fun goForward()
     fun exitFullScreen()
 
+    /** وضع موقع سطح المكتب (وكيل مستخدم سطح المكتب + إطار عرض سطح المكتب). reload=false عند إنشاء الجلسة. */
+    fun setDesktopMode(enabled: Boolean, reload: Boolean)
+
     /** حجم نموذج اللغة المطلوب بالبايت (0 = منزَّل بالفعل، null = الزوج غير مدعوم أو تعذر الفحص). */
     fun checkTranslationSize(from: String, to: String, done: (Long?) -> Unit)
 

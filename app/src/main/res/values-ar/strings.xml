@@ -220,4 +220,36 @@
     <string name="tr_download_go">نزّل وترجم</string>
     <string name="tr_started">جارٍ الترجمة…</string>
     <string name="tr_failed">فشلت الترجمة: %1$s</string>
+    <!-- المرحلة 15: المواقع المحظورة ومشاركة القوائم -->
+    <string name="blocked_sites_button">المواقع المحظورة</string>
+    <string name="blocked_sites_title">المواقع المحظورة (اضغط على موقع لإلغاء حظره)</string>
+    <string name="blocked_sites_empty">لا توجد مواقع محظورة بعد</string>
+    <string name="blocked_sites_add">إضافة موقع</string>
+    <string name="blocked_site_added">تم حظر الموقع</string>
+    <string name="blocked_site_removed">أُلغي حظر الموقع</string>
+    <string name="site_block_switch">حظر هذا الموقع</string>
+    <string name="snack_site_blocked">محجوب بقائمتك: %1$s</string>
+    <string name="block_row_blocked">موقع محجوب بقائمتك، من %1$s</string>
+    <string name="group_share">مشاركة القائمة</string>
+    <!-- المرحلة 16: بطاقة الثقة وزر الإنقاذ -->
+    <string name="trust_green">لا علامات تحذير</string>
+    <string name="trust_yellow">انتبه</string>
+    <string name="trust_red">محظور من قبلك</string>
+    <string name="trust_r_user_blocked">هذا الموقع في قائمتك المحظورة</string>
+    <string name="trust_r_not_encrypted">الاتصال غير مشفّر (HTTP)</string>
+    <string name="trust_r_redirects">حُجبت عدة تحويلات تلقائية في هذا الموقع هذا الأسبوع</string>
+    <string name="trust_r_popups">حُجبت نوافذ منبثقة كثيرة في هذا الموقع هذا الأسبوع</string>
+    <string name="trust_r_protection_off">الحماية مطفأة لهذا الموقع</string>
+    <string name="trust_r_none">لا شيء غير عادي في النشاط على جهازك</string>
+    <string name="trust_disclaimer">مبنية على إشارات في جهازك فقط (HTTPS وقائمتك المحظورة وما حُجب هذا الأسبوع). ليست فحصاً أمنياً: لا تستعلم عن قواعد بيانات التصيد أو البرمجيات الخبيثة.</string>
+    <string name="rescue_button">أنقذني من هذا الموقع</string>
+    <string name="rescue_note">يفعّل الحماية لهذا الموقع، ويحجب نوافذه وتحويلاته التلقائية وتنزيلاته غير المطلوبة، ثم يعيد تحميل الصفحة.</string>
+    <string name="rescue_done">طُبّقت أقوى حماية على هذا الموقع</string>
+    <string name="snack_download_blocked">حُجب تنزيل لم يسبقه لمس</string>
+    <string name="snack_download_allow">نزّل على أي حال</string>
+    <string name="block_row_download">حُجب تنزيل غير مطلوب في %1$s</string>
+    <!-- المرحلة 17: موقع سطح المكتب -->
+    <string name="menu_desktop_site">موقع سطح المكتب</string>
+    <string name="desktop_on">تم تفعيل موقع سطح المكتب لهذا التبويب</string>
+    <string name="desktop_off">تم إيقاف موقع سطح المكتب</string>
 </resources>

@@ -8,6 +8,7 @@
     <color name="white">#FFFFFF</color>
     <color name="vayro_success">#20C997</color>
     <color name="vayro_warning">#FFB547</color>
+    <color name="vayro_danger">#E5484D</color>
 
     <!-- ألوان الوضع الفاتح: القيم غير محددة في المواصفات، اختيار مبدئي قابل للتعديل -->
     <color name="vayro_background">#F4F5FB</color>

@@ -44,7 +44,12 @@ class TabManager(
     }
 
     private fun createTab(url: String?, title: String?, isPrivate: Boolean): Tab {
-        val tab = Tab(nextId++, isPrivate) { t -> engineFactory(t.isPrivate).also { it.listener = TabListener(t) } }
+        val tab = Tab(nextId++, isPrivate) { t ->
+            engineFactory(t.isPrivate).also {
+                it.listener = TabListener(t)
+                if (t.desktopMode) it.setDesktopMode(true, false) // جلسة جديدة لتبويب بوضع سطح المكتب
+            }
+        }
         tab.url = url
         tab.title = title
         tab.pendingUrl = url
@@ -61,8 +66,9 @@ class TabManager(
         return engine
     }
 
-    fun newTab(url: String? = null, isPrivate: Boolean = false): Tab {
+    fun newTab(url: String? = null, isPrivate: Boolean = false, openerId: Long? = null): Tab {
         val tab = createTab(url, null, isPrivate)
+        tab.openerId = openerId
         _tabs.add(tab)
         selectInternal(tab)
         listener?.onTabsChanged()
@@ -89,6 +95,44 @@ class TabManager(
             selectInternal(next)
         }
         listener?.onTabsChanged()
+        persist()
+    }
+
+    /** وضع موقع سطح المكتب لتبويب: يُطبَّق فوراً إن كان له محرك، وإلا عند إنشائه. */
+    fun setDesktopMode(tab: Tab, enabled: Boolean) {
+        tab.desktopMode = enabled
+        tab.engineOrNull?.setDesktopMode(enabled, true)
+        listener?.onTabUpdated(tab)
+    }
+
+    /**
+     * زر الرجوع في تبويب فُتح من تبويب آخر: يُغلق ويعود إلى الأصل. يعيد false إن لم يكن له أصل حي.
+     */
+    fun closeToOpener(tab: Tab): Boolean {
+        val opener = tab.openerId?.let { id -> _tabs.firstOrNull { it.id == id } } ?: return false
+        if (opener === tab) return false
+        val wasSelected = tab === selected
+        _tabs.remove(tab)
+        tab.releaseEngine()
+        if (wasSelected) selectInternal(opener)
+        listener?.onTabsChanged()
+        persist()
+        return true
+    }
+
+    /** زر الرجوع في أول صفحة من التبويب: نعود إلى الصفحة الرئيسية بدل الخروج من التطبيق. */
+    fun resetToHome(tab: Tab) {
+        tab.releaseEngine() // إغلاق الجلسة (ويمسح بيانات الجلسة الخاصة إن كانت خاصة)
+        tab.url = null
+        tab.title = null
+        tab.pendingUrl = null
+        tab.canGoBack = false
+        tab.canGoForward = false
+        tab.isLoading = false
+        tab.progress = 0
+        tab.translation = null
+        tab.isFullScreen = false
+        if (tab === selected) listener?.onSelectedTabChanged(tab, tab) else listener?.onTabUpdated(tab)
         persist()
     }
 
@@ -222,7 +266,7 @@ class TabManager(
 
         // نافذة مسموحة (روابط target=_blank) تُفتح كتبويب جديد، وتبقى خاصة إن كان مصدرها خاصاً
         override fun onOpenInNewTab(url: String) {
-            newTab(url, tab.isPrivate)
+            newTab(url, tab.isPrivate, openerId = tab.id)
         }
     }
 }

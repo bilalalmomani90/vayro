@@ -22,7 +22,9 @@ enum class CookiePolicy(val key: String) {
 
 /** أسباب الحجب المسجلة في التقارير. */
 enum class BlockReason(val key: String) {
-    AD("ad"), TRACKER("tracker"), POPUP("popup"), REDIRECT("redirect");
+    AD("ad"), TRACKER("tracker"), POPUP("popup"), REDIRECT("redirect"),
+    BLOCKED("blocked"), // موقع في قائمة المواقع المحظورة التي أنشأها المستخدم
+    DOWNLOAD("download"); // تنزيل لم يسبقه لمس من المستخدم
 
     companion object {
         fun fromKey(key: String?) = values().firstOrNull { it.key == key }
@@ -40,6 +42,20 @@ object HostUtil {
         }
     }
 
+    /** يحوّل ما يكتبه المستخدم (رابط أو نطاق) إلى اسم مضيف نظيف، أو null إن لم يكن نطاقاً صالحاً. */
+    fun normalizeInput(raw: String): String? {
+        val text = raw.trim()
+        if (text.isEmpty() || text.any { it.isWhitespace() }) return null
+        val host = hostOf(if (text.contains("://")) text else "https://$text") ?: return null
+        return host.takeIf { it.contains('.') && !it.startsWith('.') && !it.endsWith('.') }
+    }
+
+    /** هل المضيف (أو نطاقه الأب) في قائمة الحظر؟ مثال: sub.example.com يطابق example.com. */
+    fun matchesBlocklist(host: String?, blocked: Set<String>): Boolean {
+        if (host == null) return false
+        return blocked.any { host == it || host.endsWith(".$it") }
+    }
+
     /** تقريب لـ "نفس الموقع": مضيفان متطابقان أو أحدهما نطاق فرعي للآخر أو يشتركان في آخر مقطعين. */
     fun sameSite(a: String?, b: String?): Boolean {
         if (a == null || b == null) return false
@@ -52,7 +68,48 @@ object HostUtil {
 }
 
 /** قواعد القرار الخالصة (بلا Android) كي تُختبر بوحدة اختبار. */
+/** حالة بطاقة ثقة الموقع (إشارات محلية فقط). */
+enum class TrustLevel { GREEN, YELLOW, RED }
+
+enum class TrustReason { USER_BLOCKED, NOT_ENCRYPTED, MANY_REDIRECTS, MANY_POPUPS, PROTECTION_OFF, NONE }
+
+data class TrustResult(val level: TrustLevel, val reasons: List<TrustReason>)
+
+/**
+ * تقييم محلي للموقع من إشارات على الجهاز فقط: التشفير (HTTPS)، قائمتك المحظورة، وما حُجب في هذا الموقع هذا الأسبوع.
+ * ليس فحصاً أمنياً ولا يستعلم عن قواعد بيانات التصيد أو البرمجيات الخبيثة؛ ولا يعتمد على HTTPS وحده.
+ */
+object SiteTrust {
+    const val REDIRECTS_WARN = 3
+    const val POPUPS_WARN = 5
+
+    fun assess(
+        url: String?,
+        userBlocked: Boolean,
+        protectionOn: Boolean,
+        redirectsBlockedThisWeek: Int,
+        popupsBlockedThisWeek: Int
+    ): TrustResult {
+        if (userBlocked) return TrustResult(TrustLevel.RED, listOf(TrustReason.USER_BLOCKED))
+        val reasons = mutableListOf<TrustReason>()
+        if (url != null && url.lowercase().startsWith("http://")) reasons.add(TrustReason.NOT_ENCRYPTED)
+        if (redirectsBlockedThisWeek >= REDIRECTS_WARN) reasons.add(TrustReason.MANY_REDIRECTS)
+        if (popupsBlockedThisWeek >= POPUPS_WARN) reasons.add(TrustReason.MANY_POPUPS)
+        if (!protectionOn) reasons.add(TrustReason.PROTECTION_OFF)
+        return if (reasons.isEmpty()) TrustResult(TrustLevel.GREEN, listOf(TrustReason.NONE))
+        else TrustResult(TrustLevel.YELLOW, reasons)
+    }
+}
+
 object ProtectionLogic {
+
+    /** موقع "أنقذني" يعامَل بأقصى حماية لقواعد النوافذ والتحويلات والتنزيل، بغض النظر عن المستوى العام. */
+    fun effectiveLevel(global: ProtectionLevel, siteStrict: Boolean): ProtectionLevel =
+        if (siteStrict) ProtectionLevel.MAX else global
+
+    /** تنزيل بلا لمسة حديثة يُحجب في المتقدم والأقصى (للمواقع المحمية فقط). */
+    fun autoDownloadBlocked(level: ProtectionLevel, siteProtected: Boolean, recentUserTouch: Boolean): Boolean =
+        level != ProtectionLevel.NORMAL && siteProtected && !recentUserTouch
 
     /**
      * هل يُسمح بفتح نافذة جديدة؟

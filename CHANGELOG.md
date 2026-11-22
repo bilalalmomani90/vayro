@@ -1,5 +1,23 @@
 # سجل التغييرات / Changelog
 
+## 0.12.0 (build 17) - سطح المكتب وزر الرجوع + ROADMAP.md
+- «موقع سطح المكتب» (menu_desktop_site) لكل تبويب عبر GeckoSessionSettings (USER_AGENT_MODE_DESKTOP / VIEWPORT_MODE_DESKTOP).
+- زر الرجوع لم يعد يخرج من التطبيق: TabManager.closeToOpener و resetToHome، و Tab.openerId.
+- ROADMAP.md: كل بنود المواصفات بحالتها.
+
+## 0.11.1 (build 16) - تحصين بعد مراجعة يدوية لـ MainActivity
+- فحص null صريح في handleExternalIntent بدل الاعتماد على smart cast من when على intent?.action.
+- applyPrivateMode و كتابة نص العنوان لا يعملان إلا عند تغيّر الحالة (كانا يتكرران مع كل تحديث للتقدم).
+
+## 0.11.0 (build 15) - بطاقة الثقة وزر الإنقاذ
+- بطاقة ثقة محلية، زر «أنقذني من هذا الموقع»، ومنع التنزيل غير المطلوب (BlockReason.DOWNLOAD).
+- ProtectionManager: isStrict/setStrict و shouldBlockAutoDownload، و Listener.onDownloadBlocked.
+
+## 0.10.0 (build 14) - المواقع المحظورة ومشاركة القوائم
+- قائمة مواقع محظورة بيد المستخدم (النطاق وفروعه)، منع التنقل إليها مع سماح مؤقت وسبب في التقرير.
+- مشاركة قائمة مواقع كنص.
+- BlockReason.BLOCKED، و ProtectionManager.Listener.onSiteBlocked.
+
 ## 0.9.1 (build 13) - البناء من ملف zip واحد
 - الـ workflow يبني من vayro-*-full.zip في جذر المستودع إن وُجد، فيكفي رفع ملف واحد بدل عشرات الملفات بمساراتها.
 - بدون zip يبني من ملفات المستودع كما كان.

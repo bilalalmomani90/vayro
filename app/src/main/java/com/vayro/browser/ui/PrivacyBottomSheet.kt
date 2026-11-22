@@ -10,7 +10,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vayro.browser.R
 import com.vayro.browser.VayroApplication
+import android.widget.EditText
 import com.vayro.browser.core.CookiePolicy
+import com.vayro.browser.core.HostUtil
 import com.vayro.browser.core.ProtectionLevel
 import com.vayro.browser.databinding.SheetPrivacyBinding
 
@@ -70,9 +72,48 @@ class PrivacyBottomSheet : BottomSheetDialogFragment() {
         binding.clearHistoryNow.setOnClickListener {
             confirm(R.string.confirm_clear_history) { app.history.clear() }
         }
+        binding.blockedSitesButton.setOnClickListener { showBlockedSites() }
         binding.clearSiteDataButton.setOnClickListener {
             confirm(R.string.confirm_clear_site_data) { app.clearSiteData() }
         }
+    }
+
+    /** قائمة المواقع المحظورة: الضغط على موقع يلغي حظره، وزر لإضافة موقع جديد. */
+    private fun showBlockedSites() {
+        val hosts = app.protection.blockedHosts()
+        val builder = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.blocked_sites_title)
+        if (hosts.isEmpty()) {
+            builder.setMessage(R.string.blocked_sites_empty)
+        } else {
+            builder.setItems(hosts.toTypedArray()) { _, which ->
+                app.protection.setBlocked(hosts[which], false)
+                Toast.makeText(requireContext(), R.string.blocked_site_removed, Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder
+            .setPositiveButton(R.string.blocked_sites_add) { _, _ -> addBlockedSiteDialog() }
+            .setNegativeButton(R.string.action_close, null)
+            .show()
+    }
+
+    private fun addBlockedSiteDialog() {
+        val input = EditText(requireContext()).apply { setHint(R.string.field_url); setSingleLine() }
+        val pad = (24 * resources.displayMetrics.density).toInt()
+        val holder = android.widget.FrameLayout(requireContext()).apply { setPadding(pad, pad / 3, pad, 0); addView(input) }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.blocked_sites_add)
+            .setView(holder)
+            .setPositiveButton(R.string.action_save) { _, _ ->
+                val host = HostUtil.normalizeInput(input.text.toString())
+                if (host == null) {
+                    Toast.makeText(requireContext(), R.string.invalid_url, Toast.LENGTH_SHORT).show()
+                } else {
+                    app.protection.setBlocked(host, true)
+                    Toast.makeText(requireContext(), R.string.blocked_site_added, Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
     }
 
     @StringRes

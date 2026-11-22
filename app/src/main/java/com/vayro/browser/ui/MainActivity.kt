@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
     private lateinit var home: HomeController
     private lateinit var suggestions: SuggestionController
     private var fullScreenApplied = false // هل واجهة ملء الشاشة مطبَّقة حالياً
+    private var privateApplied: Boolean? = null // آخر حالة تبويب خاص طُبِّقت على الواجهة
     private var secureWindow = false // هل علم FLAG_SECURE مفعّل حالياً (التبويب الخاص)
     private val app get() = application as VayroApplication
     private val tabManager get() = app.tabManager
@@ -79,8 +80,15 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
     private val backCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
             val tab = tabManager.selected
-            // أولاً الخروج من ملء الشاشة، ثم الرجوع في السجل
-            if (tab.isFullScreen) tab.engineOrNull?.exitFullScreen() else tab.engineOrNull?.goBack()
+            // الترتيب: الخروج من ملء الشاشة، ثم الرجوع في السجل، ثم العودة للتبويب الأصلي،
+            // ثم الصفحة الرئيسية، ثم إغلاق تبويب فارغ. ولا يخرج التطبيق إلا من الصفحة الرئيسية في تبويب وحيد
+            when {
+                tab.isFullScreen -> tab.engineOrNull?.exitFullScreen()
+                tab.canGoBack -> tab.engineOrNull?.goBack()
+                tabManager.closeToOpener(tab) -> Unit
+                tab.url != null -> tabManager.resetToHome(tab)
+                tabManager.tabs.size > 1 -> tabManager.close(tab)
+            }
         }
     }
 
@@ -171,6 +179,7 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
         PopupMenu(this, anchor).apply {
             menuInflater.inflate(R.menu.main_menu, menu)
             menu.findItem(R.id.menu_forward).isEnabled = tabManager.selected.canGoForward
+            menu.findItem(R.id.menu_desktop_site).isChecked = tabManager.selected.desktopMode
             // الترجمة: "عرض الأصل" يظهر فقط والصفحة مترجمة، و"ترجمة الصفحة" عكسه
             val translated = tabManager.selected.translation?.isTranslated == true
             menu.findItem(R.id.menu_translate).isVisible = !translated
@@ -184,6 +193,7 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
                     R.id.menu_new_private_tab -> tabManager.newTab(null, isPrivate = true)
                     R.id.menu_close_private -> tabManager.closePrivateTabs()
                     R.id.menu_forward -> tabManager.selected.engineOrNull?.goForward()
+                    R.id.menu_desktop_site -> toggleDesktopSite()
                     R.id.menu_share -> sharePage()
                     R.id.menu_translate -> translatePage()
                     R.id.menu_translate_restore -> tabManager.selected.engineOrNull?.restoreOriginalPage()
@@ -219,12 +229,13 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
             Toast.makeText(this, R.string.site_open_first, Toast.LENGTH_SHORT).show()
             return
         }
-        SiteProtectionBottomSheet.newInstance(host).show(supportFragmentManager, "site")
+        SiteProtectionBottomSheet.newInstance(host, tabManager.selected.url).show(supportFragmentManager, "site")
     }
 
     /** رابط يصل من تطبيق آخر (VIEW) أو من المشاركة (SEND): يُفتح في تبويب جديد، وhttp/https فقط. */
     private fun handleExternalIntent(intent: Intent?) {
-        val url = when (intent?.action) {
+        if (intent == null) return
+        val url = when (intent.action) {
             Intent.ACTION_VIEW -> intent.dataString?.takeIf { UrlResolver.isWebUrl(it) }
             Intent.ACTION_SEND -> IntentUrls.extractWebUrl(intent.getStringExtra(Intent.EXTRA_TEXT))
             else -> null
@@ -362,6 +373,8 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
 
     /** مظهر التبويب الخاص: شريط ملوّن، تلميح مختلف، تنبيه في الرئيسية، ومنع لقطات الشاشة. */
     private fun applyPrivateMode(isPrivate: Boolean) {
+        if (privateApplied == isPrivate) return // تُستدعى مع كل تحديث للتقدم، فلا نكرر العمل
+        privateApplied = isPrivate
         binding.topBar.setBackgroundColor(
             if (isPrivate) ColorUtils.setAlphaComponent(ContextCompat.getColor(this, R.color.vayro_primary), 0x40)
             else android.graphics.Color.TRANSPARENT
@@ -452,13 +465,17 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
         if (showHome && binding.homeContainer.visibility != View.VISIBLE) home.refresh()
         binding.homeContainer.visibility = if (showHome) View.VISIBLE else View.GONE
         setReloadEnabled(url != null)
-        backCallback.isEnabled = tab.canGoBack || tab.isFullScreen
+        updateBackCallback()
         applyPrivateMode(tab.isPrivate)
         binding.progressBar.visibility = if (tab.isLoading) View.VISIBLE else View.INVISIBLE
         binding.progressBar.setProgressCompat(tab.progress, true)
         applyFullScreen(tab.isFullScreen)
         // لا نكتب فوق نص يحرره المستخدم الآن
-        if (forceAddress || !binding.addressInput.hasFocus()) binding.addressInput.setText(url.orEmpty())
+        if ((forceAddress || !binding.addressInput.hasFocus()) &&
+            binding.addressInput.text.toString() != url.orEmpty()
+        ) {
+            binding.addressInput.setText(url.orEmpty())
+        }
         refreshStar(url)
     }
 
@@ -479,6 +496,19 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
         binding.starButton.setImageResource(if (bookmarked) R.drawable.ic_star else R.drawable.ic_star_outline)
     }
 
+    /** نعترض زر الرجوع دائماً إلا في الصفحة الرئيسية لتبويب وحيد (هناك يخرج التطبيق كالمعتاد). */
+    private fun updateBackCallback() {
+        val tab = tabManager.selected
+        backCallback.isEnabled = tab.isFullScreen || tab.url != null || tabManager.tabs.size > 1
+    }
+
+    private fun toggleDesktopSite() {
+        val tab = tabManager.selected
+        val enable = !tab.desktopMode
+        tabManager.setDesktopMode(tab, enable)
+        Toast.makeText(this, if (enable) R.string.desktop_on else R.string.desktop_off, Toast.LENGTH_SHORT).show()
+    }
+
     private fun updateTabCount() {
         binding.tabsButton.text = tabManager.tabs.size.toString()
     }
@@ -496,7 +526,10 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
 
     // ---- TabManager.Listener ----
 
-    override fun onTabsChanged() = updateTabCount()
+    override fun onTabsChanged() {
+        updateTabCount()
+        updateBackCallback() // عدد التبويبات يغيّر سلوك زر الرجوع
+    }
 
     override fun onSelectedTabChanged(old: Tab?, new: Tab) = mountSelected()
 
@@ -510,6 +543,21 @@ class MainActivity : AppCompatActivity(), TabManager.Listener, PermissionHandler
         val bar = Snackbar.make(binding.root, R.string.snack_popup_blocked, Snackbar.LENGTH_LONG)
         if (UrlResolver.isWebUrl(url)) bar.setAction(R.string.snack_open) { tabManager.newTab(url) }
         bar.show()
+    }
+
+    override fun onDownloadBlocked(request: com.vayro.browser.downloads.DownloadRequest) {
+        Snackbar.make(binding.root, R.string.snack_download_blocked, Snackbar.LENGTH_LONG)
+            .setAction(R.string.snack_download_allow) { app.downloads.request(request) } // يمر بتحذير الملفات المشبوهة
+            .show()
+    }
+
+    override fun onSiteBlocked(url: String) {
+        val host = HostUtil.hostOf(url) ?: url
+        Snackbar.make(binding.root, getString(R.string.snack_site_blocked, host), Snackbar.LENGTH_LONG)
+            .setAction(R.string.snack_allow_once) {
+                app.protection.tempAllow(url) // سماح مؤقت لهذا الرابط فقط
+                tabManager.loadInSelected(url)
+            }.show()
     }
 
     override fun onRedirectBlocked(url: String) {

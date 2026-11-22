@@ -129,5 +129,13 @@
             android:text="@string/clear_site_data_desc"
             android:textColor="@color/vayro_text_secondary"
             android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/blockedSitesButton"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/blocked_sites_button" />
     </LinearLayout>
 </ScrollView>

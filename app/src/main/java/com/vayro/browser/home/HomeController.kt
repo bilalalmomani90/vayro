@@ -1,5 +1,6 @@
 package com.vayro.browser.home
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
@@ -167,6 +168,7 @@ class HomeController(
                 setOnMenuItemClickListener { item ->
                     when (item.itemId) {
                         R.id.group_open_all -> openGroup(group)
+                        R.id.group_share -> shareGroup(group)
                         R.id.group_rename -> renameGroupDialog(group)
                         R.id.group_edit_sites -> editSitesDialog(group)
                         R.id.group_delete -> confirmDeleteGroup(group)
@@ -197,6 +199,21 @@ class HomeController(
         } else {
             app.tabManager.openAllInNewTabs(urls)
         }
+    }
+
+    /** مشاركة المجموعة كنص: اسمها ثم رابط في كل سطر (روابط الويب فقط). */
+    private fun shareGroup(group: SiteGroup) {
+        val urls = GroupPlan.urlsToOpen(group.items.map { it.url })
+        if (urls.isEmpty()) {
+            Toast.makeText(activity, R.string.group_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, group.name)
+            putExtra(Intent.EXTRA_TEXT, group.name + "\n" + urls.joinToString("\n"))
+        }
+        activity.startActivity(Intent.createChooser(send, activity.getString(R.string.group_share)))
     }
 
     private fun input(hintRes: Int, initial: String = ""): EditText = EditText(activity).apply {

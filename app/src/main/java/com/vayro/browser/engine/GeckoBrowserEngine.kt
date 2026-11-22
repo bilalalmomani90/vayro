@@ -47,7 +47,7 @@ class GeckoBrowserEngine(
         if (!isPrivate) protection.report(reason, blockedUrl, pageUrl)
     }
 
-    private fun recentTouch() = SystemClock.uptimeMillis() - lastTouchAt <= TOUCH_WINDOW_MS
+    private fun recentTouch(windowMs: Long = TOUCH_WINDOW_MS) = SystemClock.uptimeMillis() - lastTouchAt <= windowMs
 
     init {
         session.progressDelegate = object : GeckoSession.ProgressDelegate {
@@ -94,6 +94,12 @@ class GeckoBrowserEngine(
                 if (request.target != GeckoSession.NavigationDelegate.TARGET_WINDOW_CURRENT) return null
                 val url = request.uri
                 if (protection.isTempAllowed(url)) return null // سماح مؤقت من المستخدم
+                // موقع في قائمة المحظورات التي أنشأها المستخدم
+                if (protection.isUrlBlocked(url)) {
+                    reportBlock(BlockReason.BLOCKED, url, currentUrl)
+                    protection.listener?.onSiteBlocked(url)
+                    return GeckoResult.fromValue(AllowOrDeny.DENY)
+                }
                 val blocked = protection.shouldBlockRedirect(
                     currentUrl, url, request.isDirectNavigation, request.isRedirect, recentTouch()
                 )
@@ -173,9 +179,14 @@ class GeckoBrowserEngine(
                 val mime = header("content-type")?.substringBefore(';')?.trim().orEmpty()
                 val name = URLUtil.guessFileName(response.uri, header("content-disposition"), mime.ifBlank { null })
                 try { response.body?.close() } catch (_: Exception) {} // لن نستهلك هذا التدفق
-                downloads.request(
-                    DownloadRequest(response.uri, name, mime, header("content-length")?.toLongOrNull() ?: -1L, currentUrl)
-                )
+                val request = DownloadRequest(response.uri, name, mime, header("content-length")?.toLongOrNull() ?: -1L, currentUrl)
+                // تنزيل لم يسبقه لمس خلال 15 ثانية (قد يتأخر الخادم) يُحجب في المتقدم والأقصى
+                if (protection.shouldBlockAutoDownload(currentUrl, recentTouch(DOWNLOAD_TOUCH_WINDOW_MS))) {
+                    reportBlock(BlockReason.DOWNLOAD, request.url, currentUrl)
+                    protection.listener?.onDownloadBlocked(request)
+                    return
+                }
+                downloads.request(request)
             }
         }
 
@@ -312,6 +323,17 @@ class GeckoBrowserEngine(
 
     override fun exitFullScreen() = session.exitFullScreen()
 
+    override fun setDesktopMode(enabled: Boolean, reload: Boolean) {
+        val settings = session.settings
+        settings.setUserAgentMode(
+            if (enabled) GeckoSessionSettings.USER_AGENT_MODE_DESKTOP else GeckoSessionSettings.USER_AGENT_MODE_MOBILE
+        )
+        settings.setViewportMode( // عرض الصفحة بعرض 980 بكسل كما في متصفح سطح المكتب
+            if (enabled) GeckoSessionSettings.VIEWPORT_MODE_DESKTOP else GeckoSessionSettings.VIEWPORT_MODE_MOBILE
+        )
+        if (reload) session.reload()
+    }
+
     override fun checkTranslationSize(from: String, to: String, done: (Long?) -> Unit) {
         TranslationsController.RuntimeTranslation.checkPairDownloadSize(from, to)
             .accept({ size -> done(size) }, { done(null) })
@@ -358,5 +380,6 @@ class GeckoBrowserEngine(
 
     private companion object {
         const val TOUCH_WINDOW_MS = 1500L
+        const val DOWNLOAD_TOUCH_WINDOW_MS = 15_000L
     }
 }
